@@ -240,7 +240,7 @@ class MainNavShell extends StatelessWidget {
                       }
                     },
                   ),
-                ),
+            ),
           ],
         ),
       ),

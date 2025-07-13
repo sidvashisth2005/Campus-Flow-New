@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/event_service.dart';
 import '../models/event.dart';
 import '../main.dart';
@@ -6,16 +7,27 @@ import '../main.dart';
 class EventRequestsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    final user = auth.currentUser;
+    final isAdminOrSecretary = user?.role == 'admins' || user?.role == 'club_secretaries';
     return StreamBuilder<List<Event>>(
       stream: EventService().eventListStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator(color: Color(0xFF47c1ea)));
         }
-        final events = (snapshot.data ?? []).where((e) => e.isApproved == false).toList();
+        final allEvents = snapshot.data ?? [];
+        final events = isAdminOrSecretary
+            ? allEvents.where((e) => e.isApproved == false).toList()
+            : allEvents.where((e) => e.createdBy == user?.id).toList();
         if (events.isEmpty) {
-          return const Center(
-            child: Text('No pending event requests.', style: TextStyle(color: Color(0xFF9db2b8), fontSize: 18)),
+          return Center(
+            child: Text(
+              isAdminOrSecretary
+                  ? 'No pending event requests.'
+                  : 'You have not created any event requests.',
+              style: const TextStyle(color: Color(0xFF9db2b8), fontSize: 18),
+            ),
           );
         }
         return ListView.separated(
@@ -63,32 +75,65 @@ class EventRequestsWidget extends StatelessWidget {
                     Text(_formatDateTime(event.startTime, event.endTime), style: const TextStyle(color: Color(0xFF47c1ea), fontSize: 12)),
                   ],
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.check, color: Color(0xFF47c1ea)),
-                      tooltip: 'Approve',
-                      onPressed: () async {
-                        await EventService().updateEvent(event.id, {'isApproved': true});
-                        showNeonSnackbar(context, 'Event approved!');
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.redAccent),
-                      tooltip: 'Reject',
-                      onPressed: () async {
-                        await EventService().deleteEvent(event.id);
-                        showNeonSnackbar(context, 'Event rejected!', error: true);
-                      },
-                    ),
-                  ],
-                ),
+                trailing: isAdminOrSecretary
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.check, color: Color(0xFF47c1ea)),
+                            tooltip: 'Approve',
+                            onPressed: () async {
+                              await EventService().updateEvent(event.id, {'isApproved': true});
+                              showNeonSnackbar(context, 'Event approved!');
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.redAccent),
+                            tooltip: 'Reject',
+                            onPressed: () async {
+                              await EventService().deleteEvent(event.id);
+                              showNeonSnackbar(context, 'Event rejected!', error: true);
+                            },
+                          ),
+                        ],
+                      )
+                    : _buildStatusChip(event),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildStatusChip(Event event) {
+    String label;
+    Color color;
+    if (event.isApproved == true) {
+      label = 'Approved';
+      color = const Color(0xFF47c1ea);
+    } else if (event.isApproved == false) {
+      label = 'Pending';
+      color = Colors.orangeAccent;
+    } else {
+      label = 'Rejected';
+      color = Colors.redAccent;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
     );
   }
 
