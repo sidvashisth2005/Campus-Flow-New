@@ -38,6 +38,7 @@ class UserService {
     final user = await getUser(id);
     if (user == null) throw Exception('User not found');
     
+    
     final role = user.role ?? 'students';
     final collection = _getUserCollection(role);
     await collection.doc(id).update(data);
