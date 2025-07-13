@@ -46,8 +46,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         appBar: AppBar(
           backgroundColor: const Color(0xFF111618),
           elevation: 0,
-          title: const Text('Create Club', style: TextStyle(color: Colors.white)),
           iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text('Create Club', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         ),
         body: SafeArea(
           child: SingleChildScrollView(

@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 elevation: 0,
                 floating: true,
                 expandedHeight: 120,
+                iconTheme: const IconThemeData(color: Colors.white),
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
                     padding: const EdgeInsets.all(20),

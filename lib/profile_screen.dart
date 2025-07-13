@@ -45,8 +45,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: AppBar(
           backgroundColor: const Color(0xFF111618),
           elevation: 0,
-          title: const Text('Profile', style: TextStyle(color: Colors.white)),
           iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text('Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
           actions: [
             IconButton(
               icon: Icon(_editing ? Icons.close : Icons.edit, color: Colors.white),

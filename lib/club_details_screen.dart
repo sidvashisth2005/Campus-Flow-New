@@ -23,8 +23,8 @@ class ClubDetailsScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFF111618),
           elevation: 0,
-          title: const Text('Club Details', style: TextStyle(color: Colors.white)),
           iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text('Club Details', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         ),
         body: FutureBuilder<Club?>(
           future: ClubService().getClub(clubId),

@@ -4,6 +4,7 @@ import 'models/event.dart';
 import 'package:go_router/go_router.dart';
 import 'widgets/timetable_widget.dart';
 import 'widgets/maps_widget.dart';
+import 'widgets/event_requests_widget.dart';
 
 class EventDiscoveryScreen extends StatelessWidget {
   const EventDiscoveryScreen({Key? key}) : super(key: key);
@@ -199,37 +200,22 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
           controller: _tabController,
           children: [
             // Tab 1: Time Table & Maps
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return Stack(
-                  children: [
-                    // TimetableWidget (not expanded)
-                    TimetableWidget(
-                      onTimetableOpenChanged: _onTimetableOpenChanged,
-                    ),
-                    // Animated map placement
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeInOut,
-                      top: _timetableOpen ? 320 : 120, // adjust as needed for your UI
-                      left: 0,
-                      right: 0,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: MapsWidget(),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-            // Tab 2: Event Requests
-            Center(
-              child: Text(
-                'Event Requests (Coming Soon)',
-                style: TextStyle(color: Color(0xFF47c1ea), fontSize: 18, fontWeight: FontWeight.bold),
+            SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TimetableWidget(),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: MapsWidget(),
+                  ),
+                ],
               ),
             ),
+            // Tab 2: Event Requests
+            EventRequestsWidget(),
           ],
         ),
       ),

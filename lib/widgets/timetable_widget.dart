@@ -3,8 +3,7 @@ import '../services/timetable_service.dart';
 import '../models/timetable.dart';
 
 class TimetableWidget extends StatefulWidget {
-  final void Function(bool open)? onTimetableOpenChanged;
-  const TimetableWidget({Key? key, this.onTimetableOpenChanged}) : super(key: key);
+  const TimetableWidget({Key? key}) : super(key: key);
 
   @override
   State<TimetableWidget> createState() => _TimetableWidgetState();
@@ -15,15 +14,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   String? selectedValue; // year number, LT number, CR number
   final TimetableService _timetableService = TimetableService();
 
-  void _notifyOpenChanged() {
-    if (widget.onTimetableOpenChanged != null) {
-      widget.onTimetableOpenChanged!(selectedType != null);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _notifyOpenChanged());
     return Container(
       padding: const EdgeInsets.all(12),
       child: Column(

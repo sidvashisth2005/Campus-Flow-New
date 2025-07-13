@@ -28,10 +28,9 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: const Color(0xFF111618),
         appBar: AppBar(
           backgroundColor: const Color(0xFF1c2426),
-          title: const Text(
-            'Search',
-            style: TextStyle(color: Colors.white),
-          ),
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text('Search', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => context.pop(),

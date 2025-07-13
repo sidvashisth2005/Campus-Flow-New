@@ -240,11 +240,12 @@ class MainNavShell extends StatelessWidget {
                       }
                     },
                   ),
-            ),
+                ),
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonAnimator: null,
       floatingActionButton: canCreate
           ? FloatingActionButton(
               backgroundColor: const Color(0xFF47c1ea),

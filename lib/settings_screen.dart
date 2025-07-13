@@ -24,8 +24,8 @@ class SettingsScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFF111618),
           elevation: 0,
-          title: const Text('Settings', style: TextStyle(color: Colors.white)),
           iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text('Settings', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
