@@ -1,0 +1,215 @@
+{
+  "project": {
+    "name": "CampusFlow",
+    "type": "University Event Management Mobile Application",
+    "platform": "Cross-platform (Android/iOS)",
+    "frontend_builder": "Gemini 2.5 Pro + Google Stitch (visual UI)",
+    "backend_builder": "Cursor AI",
+    "target_users": ["University students", "Club organizers", "Campus admins"],
+    "core_goal": "To enable seamless discovery, creation, and management of campus events in a visually immersive and professional-grade mobile experience."
+  },
+
+  "design": {
+    "theme": "Futuristic Neon + Glassmorphism + Cyberpunk + Material You",
+    "typography": ["Urbanist", "Inter", "Manrope"],
+    "grid_system": "8dp spacing, rounded corners (16–24dp), elevation and shadows",
+    "animations": {
+      "micro": "Hover bounce, tap ripple, scroll entrance transitions",
+      "macro": "Onboarding liquid swipe, hero image collapse on scroll, AI chat animation"
+    },
+    "moodboard_inspiration": ["Duolingo (playful)", "Notion (elegant)", "Instagram (social flow)", "Pinterest (explore view)", "Apple Wallet (passes)"]
+  },
+
+  "ui_screens": [
+    {
+      "screen": "Onboarding",
+      "features": [
+        "Liquid swipe transitions",
+        "Lottie animations or SVG visuals",
+        "3–5 intro pages with CTAs like 'Explore Events', 'Join Clubs', 'Be the Flow'",
+        "Google Sign-in integration"
+      ]
+    },
+    {
+      "screen": "Home",
+      "features": [
+        "Featured event carousel (glowing banners)",
+        "Upcoming event timeline",
+        "Search bar (smart chips, predictive)",
+        "Category filters: Tech, Sports, Cultural, etc."
+      ]
+    },
+    {
+      "screen": "Event Discovery",
+      "features": [
+        "Pinterest-style vertical masonry layout",
+        "Event poster grid cards",
+        "Filters by category/date",
+        "Tap-to-expand with 3D hover glow"
+      ]
+    },
+    {
+      "screen": "Event Details",
+      "features": [
+        "Dynamic banner with blur",
+        "Event title, time, venue, club info",
+        "Join Event button (animated)",
+        "Save & Share options"
+      ]
+    },
+    {
+      "screen": "AI Assistant",
+      "features": [
+        "Chat interface",
+        "Voice/text input",
+        "Smart suggestions: 'Find events for me', 'Generate post caption'",
+        "Typing and voice animations"
+      ]
+    },
+    {
+      "screen": "Create Event",
+      "features": [
+        "Multi-step form",
+        "Image/file picker with preview",
+        "Request approval toggle",
+        "Glowing submit button"
+      ]
+    },
+    {
+      "screen": "Admin Dashboard",
+      "features": [
+        "Tabbed view: Pending, Approved, Rejected",
+        "Approve/reject buttons",
+        "Event status indicators"
+      ]
+    },
+    {
+      "screen": "Notifications",
+      "features": [
+        "Glowing notification pills",
+        "Categorized: Approvals, Club updates, New events"
+      ]
+    },
+    {
+      "screen": "Profile",
+      "features": [
+        "Cover photo with blur",
+        "Glowing profile picture ring",
+        "Toggle dark/light mode",
+        "User details: email, joined events, roles"
+      ]
+    }
+  ],
+
+  "core_components": {
+    "navigation": {
+      "type": "Bottom nav bar",
+      "items": ["Home", "Events", "Create", "AI", "Profile"],
+      "effect": "Glow highlight, hover bounce"
+    },
+    "buttons": {
+      "styles": ["Neon border", "Gradient fill", "Glassmorphism background"],
+      "interaction": "Ripple, soft glow pulse"
+    },
+    "search_bar": "Animated expansion, smart suggestions, floating on scroll",
+    "chips": "Pulsing glow, tap to activate filter",
+    "fab": "Floating button for AI or Create, morphs into modal"
+  },
+
+  "backend": {
+    "stack": "Node.js with Express or Firebase Cloud Functions",
+    "auth": "Firebase Authentication (email/password + Google Sign-In)",
+    "database": "Firebase Firestore (NoSQL)",
+    "storage": "Firebase Storage (event posters, club logos)",
+    "optional_notifications": "Firebase Cloud Messaging (Push for event reminders)",
+    "APIs": {
+      "users": {
+        "POST /signup": "Register new users",
+        "POST /login": "User login",
+        "GET /me": "Get user profile"
+      },
+      "events": {
+        "GET /events": "List all events",
+        "GET /events/:id": "Get event details",
+        "POST /events": "Create event (auth required)",
+        "PUT /events/:id": "Edit event (club admin)",
+        "DELETE /events/:id": "Delete event (admin only)",
+        "POST /events/:id/join": "Join event",
+        "POST /events/:id/save": "Bookmark event"
+      },
+      "clubs": {
+        "GET /clubs": "List clubs",
+        "GET /clubs/:id": "Club details",
+        "POST /clubs": "Create club (global admin only)"
+      },
+      "admin": {
+        "GET /pending-events": "List unapproved events",
+        "POST /approve/:id": "Approve event",
+        "POST /reject/:id": "Reject event"
+      },
+      "notifications": {
+        "GET /notifications": "List notifications for user",
+        "POST /notifications": "Create system notification"
+      }
+    },
+    "firestore_schema": {
+      "users": {
+        "id": "string",
+        "name": "string",
+        "email": "string",
+        "role": "student | club_admin | global_admin",
+        "joinedEvents": ["eventId"],
+        "savedEvents": ["eventId"]
+      },
+      "events": {
+        "id": "string",
+        "title": "string",
+        "description": "string",
+        "category": "Tech | Sports | Music | Cultural",
+        "posterUrl": "string",
+        "clubId": "string",
+        "location": "string",
+        "timestamp": "datetime",
+        "status": "pending | approved | rejected",
+        "participants": ["userId"],
+        "public": "boolean"
+      },
+      "clubs": {
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "adminId": "userId",
+        "logoUrl": "string"
+      },
+      "notifications": {
+        "id": "string",
+        "userId": "string",
+        "title": "string",
+        "body": "string",
+        "timestamp": "datetime",
+        "read": "boolean"
+      }
+    },
+    "security_rules": {
+      "users": "Self-read/write only",
+      "events": "Read public, write if admin or club_admin",
+      "clubs": "Read all, write admin only",
+      "notifications": "Read/write if user is recipient"
+    }
+  },
+
+  "ai_assistant_features": {
+    "suggest_events": "Based on interests, location, past joins",
+    "generate_captions": "Social captions for event posts",
+    "smart_create_help": "AI assistance during event creation",
+    "voice_mode": "Voice-to-text and suggestions"
+  },
+
+  "unique_features": [
+    "AI-powered smart discovery feed",
+    "QR event passes (Apple Wallet style)",
+    "Mini reels for event highlights (Instagram Reels-style)",
+    "Semester summary for joined/saved events (Spotify Wrapped-inspired)",
+    "Swipe-to-discover interface (Tinder-like for events)"
+  ]
+}

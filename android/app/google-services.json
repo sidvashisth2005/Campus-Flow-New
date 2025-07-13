@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "61754267319",
+    "project_id": "fir-auth-task-2-84e3d",
+    "storage_bucket": "fir-auth-task-2-84e3d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61754267319:android:e7d74682e851369e2edf32",
+        "android_client_info": {
+          "package_name": "com.example.campus_flow__"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "61754267319-51p3htp6uqc95b6oqbe8flo69jn8vogf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.campus_flow__",
+            "certificate_hash": "ba6193663acc8a9d1cfe8e118f7a167b0f6ff659"
+          }
+        },
+        {
+          "client_id": "61754267319-k0e257hvnm0hcp36s9qrjq58e1ecl8lr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2Hxdob6uJAtSj63r02FFdY4ygVQsrWPY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61754267319-k0e257hvnm0hcp36s9qrjq58e1ecl8lr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "61754267319-1ho5ak8o0l23p0cudv863ftlmt5jmvvb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.campusFlow"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
