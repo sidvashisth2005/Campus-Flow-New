@@ -3,6 +3,7 @@ import 'services/event_service.dart';
 import 'models/event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
+import 'widgets/status_chip.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -130,7 +131,25 @@ class _AdminEventCard extends StatelessWidget {
               ),
             ),
           ),
-          title: Text(event.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(event.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              StatusChip(
+                label: event.isApproved == true
+                    ? 'Approved'
+                    : event.isApproved == false
+                        ? 'Pending'
+                        : 'Rejected',
+                color: event.isApproved == true
+                    ? const Color(0xFF47c1ea)
+                    : event.isApproved == false
+                        ? Colors.orangeAccent
+                        : Colors.redAccent,
+              ),
+            ],
+          ),
           subtitle: Text(event.location, style: const TextStyle(color: Color(0xFF9db2b8))),
           trailing: event.isApproved == false
               ? Row(

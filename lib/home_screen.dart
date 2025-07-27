@@ -6,6 +6,7 @@ import 'services/event_service.dart';
 import 'models/event.dart';
 import 'main.dart';
 import 'widgets/role_based_widget.dart';
+import 'widgets/status_chip.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String selectedCategory = 'All';
+  String searchQuery = '';
   final List<String> categories = ['All', 'Tech', 'Sports', 'Cultural', 'Music', 'Academic'];
 
   @override
@@ -107,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
-                      onTap: () => context.go('/search'),
+                      onChanged: (value) => setState(() => searchQuery = value),
                     ),
                   ),
                 ),
@@ -169,8 +171,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator(color: Color(0xFF47c1ea)));
                       }
-                      final events = (snapshot.data ?? []).where((e) => e.isApproved == true).toList();
-                      if (events.isEmpty) {
+                      final filteredEvents = (snapshot.data ?? [])
+                          .where((e) => e.isApproved == true)
+                          .where((e) => selectedCategory == 'All' || (e.tags?.contains(selectedCategory) ?? false))
+                          .where((e) => searchQuery.isEmpty || e.title.toLowerCase().contains(searchQuery.toLowerCase()))
+                          .toList();
+                      if (filteredEvents.isEmpty) {
                         return const Center(
                           child: Text(
                             'No featured events',
@@ -178,12 +184,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       }
+                      // Sort by startTime descending (latest first)
+                      filteredEvents.sort((a, b) => b.startTime.compareTo(a.startTime));
+                      final latest5 = filteredEvents.take(5).toList();
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: events.take(5).length,
+                        itemCount: latest5.length,
                         itemBuilder: (context, index) {
-                          final event = events[index];
+                          final event = latest5[index];
                           return Container(
                             width: 280,
                             margin: const EdgeInsets.only(right: 16),
@@ -230,15 +239,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          event.title,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                event.title,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -372,8 +388,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Center(child: CircularProgressIndicator(color: Color(0xFF47c1ea))),
                       );
                     }
-                    final events = (snapshot.data ?? []).where((e) => e.isApproved == true).toList();
-                    if (events.isEmpty) {
+                    final filteredEvents = (snapshot.data ?? [])
+                        .where((e) => e.isApproved == true)
+                        .where((e) => selectedCategory == 'All' || (e.tags?.contains(selectedCategory) ?? false))
+                        .where((e) => searchQuery.isEmpty || e.title.toLowerCase().contains(searchQuery.toLowerCase()))
+                        .toList();
+                    if (filteredEvents.isEmpty) {
                       return const SliverToBoxAdapter(
                         child: Center(
                           child: Padding(
@@ -386,10 +406,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       );
                     }
+                    // Sort by startTime descending (latest first)
+                    filteredEvents.sort((a, b) => b.startTime.compareTo(a.startTime));
+                    final latest5Ids = filteredEvents.take(5).map((e) => e.id).toSet();
+                    final restEvents = filteredEvents.where((e) => !latest5Ids.contains(e.id)).toList();
                     return SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          final event = events[index];
+                          final event = restEvents[index];
                           return Container(
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
@@ -414,13 +438,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               ),
-                              title: Text(
-                                event.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    event.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // Remove StatusChip from here
+                                  // StatusChip(
+                                  //   label: event.isApproved == true
+                                  //       ? 'Approved'
+                                  //       : event.isApproved == false
+                                  //           ? 'Pending'
+                                  //           : 'Rejected',
+                                  //   color: event.isApproved == true
+                                  //       ? const Color(0xFF47c1ea)
+                                  //       : event.isApproved == false
+                                  //           ? Colors.orangeAccent
+                                  //           : Colors.redAccent,
+                                  // ),
+                                ],
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         },
-                        childCount: events.take(5).length,
+                        childCount: restEvents.length,
                       ),
                     );
                   },

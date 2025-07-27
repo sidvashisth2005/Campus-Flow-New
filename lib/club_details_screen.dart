@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'main.dart';
 import 'services/user_service.dart';
 import 'models/app_user.dart';
+import 'widgets/status_chip.dart';
 
 class ClubDetailsScreen extends StatelessWidget {
   final String clubId;
@@ -71,6 +72,11 @@ class ClubDetailsScreen extends StatelessWidget {
                         style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
+                      if (user != null)
+                        StatusChip(
+                          label: (user.clubIds ?? []).contains(club.id) ? 'Member' : 'Not a Member',
+                          color: (user.clubIds ?? []).contains(club.id) ? const Color(0xFF47c1ea) : Colors.grey,
+                        ),
                       if (club.category != null && club.category!.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

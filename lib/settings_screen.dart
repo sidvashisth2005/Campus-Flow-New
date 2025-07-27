@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -75,6 +76,64 @@ class SettingsScreen extends StatelessWidget {
                 color: Colors.redAccent,
                 onTap: () {
                   // TODO: Implement account deletion
+                },
+              ),
+              const SizedBox(height: 24),
+              Text('Support', style: _sectionStyle()),
+              const SizedBox(height: 8),
+              _SettingsButton(
+                title: 'Send Feedback / Report Bug',
+                icon: Icons.feedback,
+                color: Color(0xFF47c1ea),
+                onTap: () async {
+                  final feedback = await showDialog<String>(
+                    context: context,
+                    builder: (context) {
+                      String text = '';
+                      return AlertDialog(
+                        backgroundColor: const Color(0xFF1c2426),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: const Text('Send Feedback / Report Bug', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold)),
+                        content: TextField(
+                          autofocus: true,
+                          maxLines: 5,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Describe your feedback or bug...',
+                            hintStyle: TextStyle(color: Color(0xFF9db2b8)),
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (v) => text = v,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel', style: TextStyle(color: Color(0xFF9db2b8))),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF47c1ea),
+                              foregroundColor: const Color(0xFF111618),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(text),
+                            child: const Text('Submit'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  if (feedback != null && feedback.trim().isNotEmpty) {
+                    final user = Provider.of<AuthProvider>(context, listen: false).currentUser;
+                    await FirebaseFirestore.instance.collection('feedback').add({
+                      'feedback': feedback.trim(),
+                      'userId': user?.id,
+                      'userEmail': user?.email,
+                      'createdAt': DateTime.now(),
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Thank you for your feedback!'), backgroundColor: Color(0xFF47c1ea)),
+                    );
+                  }
                 },
               ),
             ],

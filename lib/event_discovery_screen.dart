@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'services/event_service.dart';
 import 'models/event.dart';
-import 'package:go_router/go_router.dart';
+import 'main.dart';
 import 'widgets/timetable_widget.dart';
 import 'widgets/maps_widget.dart';
 import 'widgets/event_requests_widget.dart';
+import 'widgets/status_chip.dart';
 
 class EventDiscoveryScreen extends StatelessWidget {
   const EventDiscoveryScreen({Key? key}) : super(key: key);
@@ -98,13 +101,23 @@ class _EventCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      event.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            event.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        StatusChip(
+                          label: _statusLabel(event.isApproved),
+                          color: _statusColor(event.isApproved),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -131,6 +144,17 @@ class _EventCard extends StatelessWidget {
     final startTime = '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')}';
     final endTime = '${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
     return '$date, $startTime - $endTime';
+  }
+
+  String _statusLabel(bool? isApproved) {
+    if (isApproved == true) return 'Approved';
+    if (isApproved == false) return 'Pending';
+    return 'Rejected';
+  }
+  Color _statusColor(bool? isApproved) {
+    if (isApproved == true) return const Color(0xFF47c1ea);
+    if (isApproved == false) return Colors.orangeAccent;
+    return Colors.redAccent;
   }
 }
 
@@ -165,6 +189,9 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    final user = auth.currentUser;
+    final isStudent = user?.role == 'students';
     return WillPopScope(
       onWillPop: () async {
         // Navigate back to home instead of closing app
@@ -190,9 +217,9 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
             indicatorColor: const Color(0xFF47c1ea),
             labelColor: const Color(0xFF47c1ea),
             unselectedLabelColor: Colors.white,
-            tabs: const [
-              Tab(text: 'Time Table & Maps'),
-              Tab(text: 'Event Requests'),
+            tabs: [
+              const Tab(text: 'Time Table & Maps'),
+              if (!isStudent) const Tab(text: 'Event Requests'),
             ],
           ),
         ),
@@ -214,8 +241,7 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
                 ],
               ),
             ),
-            // Tab 2: Event Requests
-            EventRequestsWidget(),
+            if (!isStudent) EventRequestsWidget(),
           ],
         ),
       ),

@@ -3,13 +3,14 @@ import 'package:provider/provider.dart';
 import '../services/event_service.dart';
 import '../models/event.dart';
 import '../main.dart';
+import '../widgets/status_chip.dart';
 
 class EventRequestsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.currentUser;
-    final isAdminOrSecretary = user?.role == 'admins' || user?.role == 'club_secretaries';
+    final isAdmin = user?.role == 'admins';
     return StreamBuilder<List<Event>>(
       stream: EventService().eventListStream(),
       builder: (context, snapshot) {
@@ -17,13 +18,13 @@ class EventRequestsWidget extends StatelessWidget {
           return const Center(child: CircularProgressIndicator(color: Color(0xFF47c1ea)));
         }
         final allEvents = snapshot.data ?? [];
-        final events = isAdminOrSecretary
+        final events = isAdmin
             ? allEvents.where((e) => e.isApproved == false).toList()
             : allEvents.where((e) => e.createdBy == user?.id).toList();
         if (events.isEmpty) {
           return Center(
             child: Text(
-              isAdminOrSecretary
+              isAdmin
                   ? 'No pending event requests.'
                   : 'You have not created any event requests.',
               style: const TextStyle(color: Color(0xFF9db2b8), fontSize: 18),
@@ -75,7 +76,7 @@ class EventRequestsWidget extends StatelessWidget {
                     Text(_formatDateTime(event.startTime, event.endTime), style: const TextStyle(color: Color(0xFF47c1ea), fontSize: 12)),
                   ],
                 ),
-                trailing: isAdminOrSecretary
+                trailing: isAdmin
                     ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -119,21 +120,9 @@ class EventRequestsWidget extends StatelessWidget {
       label = 'Rejected';
       color = Colors.redAccent;
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-        ),
-      ),
+    return StatusChip(
+      label: label,
+      color: color,
     );
   }
 

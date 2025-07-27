@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/event_service.dart';
 import 'models/event.dart';
+import 'widgets/status_chip.dart';
 
 class EventDetailsScreen extends StatelessWidget {
   final String eventId;
@@ -48,6 +49,19 @@ class EventDetailsScreen extends StatelessWidget {
                 Text(
                   event.title,
                   style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                StatusChip(
+                  label: event.isApproved == true
+                      ? 'Approved'
+                      : event.isApproved == false
+                          ? 'Pending'
+                          : 'Rejected',
+                  color: event.isApproved == true
+                      ? const Color(0xFF47c1ea)
+                      : event.isApproved == false
+                          ? Colors.orangeAccent
+                          : Colors.redAccent,
                 ),
                 const SizedBox(height: 8),
                 Text(

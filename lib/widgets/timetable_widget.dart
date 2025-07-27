@@ -289,76 +289,133 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   }
 
   Widget _buildTimetableContent() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1c2426),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF293438)),
-      ),
-      margin: const EdgeInsets.only(top: 8),
-      child: Column(
-        children: [
-          // Header with day tabs
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFF293438)),
+    // Determine Firestore query based on selectedType/selectedValue
+    if (selectedType == null || selectedValue == null) {
+      return const SizedBox.shrink();
+    }
+    // For demo: assume 'room' field is used for LT/CR, and 'year' is in description or subject
+    Stream<List<TimetableEntry>> stream;
+    if (selectedType == 'year') {
+      stream = _timetableService.getTimetableStream();
+    } else if (selectedType == 'lecture_theater' || selectedType == 'classroom') {
+      stream = _timetableService.getTimetableStream();
+    } else {
+      return const SizedBox.shrink();
+    }
+    return StreamBuilder<List<TimetableEntry>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF47c1ea)));
+        }
+        final entries = (snapshot.data ?? []).where((entry) {
+          if (selectedType == 'year') {
+            // Try to match year in subject or description
+            return entry.subject.contains(selectedValue!) || (entry.description?.contains(selectedValue!) ?? false);
+          } else if (selectedType == 'lecture_theater') {
+            return entry.room == selectedValue;
+          } else if (selectedType == 'classroom') {
+            return entry.room == selectedValue;
+          }
+          return false;
+        }).toList();
+        if (entries.isEmpty) {
+          // Show a static demo timetable as a placeholder
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text('Monday', style: const TextStyle(color: Color(0xFF47c1ea), fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.schedule,
-                  color: const Color(0xFF47c1ea),
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Timetable for ${_getValueTitle(selectedType!, selectedValue!)}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+              Table(
+                columnWidths: const {
+                  0: FlexColumnWidth(2),
+                  1: FlexColumnWidth(2),
+                  2: FlexColumnWidth(2),
+                  3: FlexColumnWidth(2),
+                },
+                border: TableBorder.all(color: const Color(0xFF293438)),
+                children: [
+                  TableRow(
+                    decoration: const BoxDecoration(color: Color(0xFF1c2426)),
+                    children: const [
+                      Padding(padding: EdgeInsets.all(8), child: Text('Time', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Subject', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Room', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Teacher', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                    ],
                   ),
+                  TableRow(
+                    decoration: const BoxDecoration(color: Color(0xFF111618)),
+                    children: [
+                      Padding(padding: EdgeInsets.all(8), child: Text('9:00-10:00', style: TextStyle(color: Colors.white))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Math', style: TextStyle(color: Colors.white))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('LT1', style: TextStyle(color: Colors.white))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Dr. Smith', style: TextStyle(color: Colors.white))),
+                    ],
+                  ),
+                  TableRow(
+                    decoration: const BoxDecoration(color: Color(0xFF111618)),
+                    children: [
+                      Padding(padding: EdgeInsets.all(8), child: Text('10:00-11:00', style: TextStyle(color: Colors.white))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Physics', style: TextStyle(color: Colors.white))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('LT2', style: TextStyle(color: Colors.white))),
+                      Padding(padding: EdgeInsets.all(8), child: Text('Dr. Jane', style: TextStyle(color: Colors.white))),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+        // Group by day
+        final days = entries.map((e) => e.day).toSet().toList()..sort();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: days.map((day) {
+            final dayEntries = entries.where((e) => e.day == day).toList()..sort((a, b) => a.timeSlot.compareTo(b.timeSlot));
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(day, style: const TextStyle(color: Color(0xFF47c1ea), fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+                Table(
+                  columnWidths: const {
+                    0: FlexColumnWidth(2),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2),
+                    3: FlexColumnWidth(2),
+                  },
+                  border: TableBorder.all(color: const Color(0xFF293438)),
+                  children: [
+                    TableRow(
+                      decoration: const BoxDecoration(color: Color(0xFF1c2426)),
+                      children: const [
+                        Padding(padding: EdgeInsets.all(8), child: Text('Time', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                        Padding(padding: EdgeInsets.all(8), child: Text('Subject', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                        Padding(padding: EdgeInsets.all(8), child: Text('Room', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                        Padding(padding: EdgeInsets.all(8), child: Text('Teacher', style: TextStyle(color: Color(0xFF47c1ea), fontWeight: FontWeight.bold))),
+                      ],
+                    ),
+                    ...dayEntries.map((entry) => TableRow(
+                      decoration: const BoxDecoration(color: Color(0xFF111618)),
+                      children: [
+                        Padding(padding: EdgeInsets.all(8), child: Text(entry.timeSlot, style: const TextStyle(color: Colors.white))),
+                        Padding(padding: EdgeInsets.all(8), child: Text(entry.subject, style: const TextStyle(color: Colors.white))),
+                        Padding(padding: EdgeInsets.all(8), child: Text(entry.room, style: const TextStyle(color: Colors.white))),
+                        Padding(padding: EdgeInsets.all(8), child: Text(entry.teacher, style: const TextStyle(color: Colors.white))),
+                      ],
+                    )),
+                  ],
                 ),
               ],
-            ),
-          ),
-          // Placeholder content
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.schedule,
-                  size: 64,
-                  color: const Color(0xFF47c1ea).withOpacity(0.5),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Timetable Coming Soon',
-                  style: TextStyle(
-                    color: const Color(0xFF9db2b8),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Upload timetable data via Firebase\nor JSON file to view schedule',
-                  style: TextStyle(
-                    color: const Color(0xFF9db2b8).withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
